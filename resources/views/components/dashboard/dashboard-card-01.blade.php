@@ -1,7 +1,8 @@
+{{-- resources/views/components/dashboard/dashboard-card-01.blade.php --}}
 <div class="flex flex-col col-span-full sm:col-span-6 xl:col-span-4 bg-white dark:bg-gray-800 shadow-xs rounded-xl">
     <div class="px-5 pt-5">
-        <header class="flex justify-between items-start mb-2">
-            <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Acme Plus</h2>
+        <header class="flex justify-between items-start">
+            <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Total Pemasukan</h2>
             <!-- Menu button -->
             <div class="relative inline-flex" x-data="{ open: false }">
                 <button
@@ -33,28 +34,26 @@
                 >
                     <ul>
                         <li>
-                            <a class="font-medium text-sm text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-200 flex py-1 px-3" href="#0" @click="open = false" @focus="open = true" @focusout="open = false">Option 1</a>
+                            <a class="font-medium text-sm text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-200 flex py-1 px-3" href="#0">View Details</a>
                         </li>
                         <li>
-                            <a class="font-medium text-sm text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-200 flex py-1 px-3" href="#0" @click="open = false" @focus="open = true" @focusout="open = false">Option 2</a>
-                        </li>
-                        <li>
-                            <a class="font-medium text-sm text-red-500 hover:text-red-600 flex py-1 px-3" href="#0" @click="open = false" @focus="open = true" @focusout="open = false">Remove</a>
+                            <a class="font-medium text-sm text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-200 flex py-1 px-3" href="#0">Export</a>
                         </li>
                     </ul>
                 </div>
             </div>
         </header>
-        <div class="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase mb-1">Sales</div>
+        <div class="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase mb-1">Income</div>
         <div class="flex items-start">
-            <div class="text-3xl font-bold text-gray-800 dark:text-gray-100 mr-2">${{ number_format($dataFeed->sumDataSet(1, 1), 0) }}</div>
-            <div class="text-sm font-medium text-green-700 px-1.5 bg-green-500/20 rounded-full">+49%</div>
+            <div class="text-2xl font-bold text-gray-800 dark:text-gray-100 mr-2">Rp{{ number_format($financialSummary['total_income'], 0) }}</div>
+            @if($financialSummary['income_percentage'] != 0)
+                <div class="text-sm font-medium {{ $financialSummary['income_percentage'] > 0 ? 'text-green-700 bg-green-500/20' : 'text-red-700 bg-red-500/20' }} px-1.5 rounded-full">
+                    {{ $financialSummary['income_percentage'] > 0 ? '+' : '' }}{{ $financialSummary['income_percentage'] }}%
+                </div>
+            @endif
         </div>
     </div>
-    <!-- Chart built with Chart.js 3 -->
-    <!-- Check out src/js/components/dashboard-card-01.js for config -->
-    <div class="grow max-sm:max-h-[128px] xl:max-h-[128px]">
-        <!-- Change the height attribute to adjust the chart height -->
-        <canvas id="dashboard-card-01" width="389" height="128"></canvas>
-    </div>
+    
+    <!-- Chart Container -->
+   
 </div>

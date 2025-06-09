@@ -32,7 +32,7 @@
                 <x-dropdown-notifications align="right" />
 
                 <!-- Info button -->
-                <x-dropdown-help align="right" />
+                {{-- <x-dropdown-help align="right" /> --}}
 
                 <!-- Dark mode toggle -->
                 <x-theme-toggle />                

@@ -61,7 +61,7 @@
             </form>
             <div class="py-4 px-2">
                 <!-- Recent searches -->
-                <div class="mb-3 last:mb-0">
+                {{-- <div class="mb-3 last:mb-0">
                     <div class="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase px-2 mb-2">Recent searches</div>
                     <ul class="text-sm">
                         <li>
@@ -135,7 +135,31 @@
                             </a>
                         </li>
                     </ul>
+                </div> --}}
+                 {{-- <script src="https://unpkg.com/@dotlottie/player-component@2.7.12/dist/dotlottie-player.mjs" type="module"></script> --}}
+
+                <div class="sm:px-6 lg:px-8 py-8 w-full max-w-9xl mx-auto">
+                    <div class="max-w-2xl m-auto">
+                        <div class="text-center px-4">
+                            <div class="inline-flex">
+                                {{-- Lottie Animation --}}
+                                <script src="https://unpkg.com/@dotlottie/player-component@2.7.12/dist/dotlottie-player.mjs" type="module"></script>
+                                <dotlottie-player src="https://lottie.host/27b3ae8e-12d0-4799-b9ec-c8dc875959d7/A0Dm0ZC2vr.lottie" background="transparent" speed="1" style="width: 400px; height: 400px" loop autoplay></dotlottie-player>
+                            </div>
+
+                            <div class="mb-6 text-lg font-semibold text-gray-800 dark:text-gray-200">
+                                We’re performing scheduled maintenance.<br>
+                                Thank you for your patience and understanding.
+                            </div>
+
+                            {{-- <a href="{{ route('dashboard') }}" class="btn bg-indigo-500 hover:bg-indigo-600 text-white">
+                                Back To Dashboard
+                            </a> --}}
+                        </div>
+                    </div>
                 </div>
+
+           
             </div>
         </div>
     </div>                    

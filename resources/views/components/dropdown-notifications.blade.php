@@ -33,12 +33,30 @@
         <div class="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase pt-1.5 pb-2 px-4">Notifications</div>
         <ul>
             <li class="border-b border-gray-200 dark:border-gray-700/60 last:border-0">
-                <a class="block py-2 px-4 hover:bg-gray-50 dark:hover:bg-gray-700/20" href="#0" @click="open = false" @focus="open = true" @focusout="open = false">
-                    <span class="block text-sm mb-2">📣 <span class="font-medium text-gray-800 dark:text-gray-100">Edit your information in a swipe</span> Sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim.</span>
-                    <span class="block text-xs font-medium text-gray-400 dark:text-gray-500">Feb 12, 2024</span>
-                </a>
+                   <div class="sm:px-6 lg:px-8 py-8 w-full max-w-9xl mx-auto">
+                    <div class="max-w-2xl m-auto">
+                        <div class="text-center">
+                            {{-- Lottie Player Script --}}
+                            <div class="inline-flex">
+                                {{-- Lottie Animation --}}
+                                <script src="https://unpkg.com/@dotlottie/player-component@2.7.12/dist/dotlottie-player.mjs" type="module"></script>
+                                <dotlottie-player src="https://lottie.host/27b3ae8e-12d0-4799-b9ec-c8dc875959d7/A0Dm0ZC2vr.lottie" background="transparent" speed="1" style="width: 250px; height: 250px" loop autoplay></dotlottie-player>
+                            </div>
+
+                            <div class="text-center mb-6 text-xs font-semibold text-gray-800 dark:text-gray-200">
+                                We’re performing scheduled maintenance.<br>
+                                Thank you for your patience and understanding.
+                            </div>
+
+
+                            {{-- <a href="{{ route('dashboard') }}" class="btn bg-indigo-500 hover:bg-indigo-600 text-white">
+                                Back To Dashboard
+                            </a> --}}
+                        </div>
+                    </div>
+                </div>
             </li>
-            <li class="border-b border-gray-200 dark:border-gray-700/60 last:border-0">
+            {{-- <li class="border-b border-gray-200 dark:border-gray-700/60 last:border-0">
                 <a class="block py-2 px-4 hover:bg-gray-50 dark:hover:bg-gray-700/20" href="#0" @click="open = false" @focus="open = true" @focusout="open = false">
                     <span class="block text-sm mb-2">📣 <span class="font-medium text-gray-800 dark:text-gray-100">Edit your information in a swipe</span> Sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim.</span>
                     <span class="block text-xs font-medium text-gray-400 dark:text-gray-500">Feb 9, 2024</span>
@@ -49,7 +67,7 @@
                     <span class="block text-sm mb-2">🚀<span class="font-medium text-gray-800 dark:text-gray-100">Say goodbye to paper receipts!</span> Sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim.</span>
                     <span class="block text-xs font-medium text-gray-400 dark:text-gray-500">Jan 24, 2024</span>
                 </a>
-            </li>
+            </li> --}}
         </ul>                
     </div>
 </div>

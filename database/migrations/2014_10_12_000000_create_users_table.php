@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
+            $table->string('company_id')->nullable(); // Optional: If you want to associate users with a company
             $table->string('password');
             $table->rememberToken();
             $table->foreignId('current_team_id')->nullable();
