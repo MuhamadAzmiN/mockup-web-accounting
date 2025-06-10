@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Product;
 use App\Traits\AuthorizationChecker;
+use DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
@@ -16,10 +17,14 @@ class ProductController extends Controller
     public function index()
     {
         $this->checkAuthorization(Auth::user(), ['manage_product']);
-
+        $product = collect();
+        if (Auth::user()->company){
           $products = Product::where('company_id', Auth::user()->company_id)
             ->where('type', 'inventory') // filter dulu hanya operational
             ->orderBy('created_at', 'desc');
+        }else if(Auth::user()->hasRole('super-admin')){
+            $products = Product::where('type', 'inventory');
+        }
 
         if (request()->has('search') && request('search') != '') {
             $search = request('search');
@@ -40,7 +45,13 @@ class ProductController extends Controller
     public function create()
     {
         $this->checkAuthorization(Auth::user(), ['manage_product']);
-        $branches = Auth::user()->company->branches()->select('id', 'name')->get();
+        $branches = collect();
+        $user = Auth::user();
+        if ($user && $user->company){
+            $branches = $user->company->branches()->select('id', 'name')->get();
+        }else if($user->hasRole('super-admin')){
+            $branches = DB::table('branches')->select('id', 'name')->get();
+        }
         return view('pages.products.create', compact('branches'));
     }
 
@@ -56,7 +67,7 @@ class ProductController extends Controller
         'stock' => 'required|integer|min:0',
         'selling_price' => 'required|numeric|min:0',
         'information' => 'nullable|string',
-        'company_id' => 'required',
+        'company_id' => (Auth::user()->hasRole('super-admin')) ? 'nullable' : 'required',
         // 'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
     ]);
 

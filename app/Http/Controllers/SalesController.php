@@ -28,13 +28,19 @@ class SalesController extends Controller
     
     public function index()
     {
-        $productSales = ProductSales::where("company_id", FacadesAuth::user()->company_id)->paginate(10);
+        $productSales = collect();
+        
+          if(FacadesAuth::user()->company){
+            $productSales = Sales::where('company_id', FacadesAuth::user()->company_id)->orderBy('created_at', 'desc')->paginate(10);
+        }else if(FacadesAuth::user()->hasRole('super-admin')){
+            $productSales = Sales::orderBy('created_at', 'desc')->paginate(10);     
+        }
         return view('pages.sales.index', compact('productSales'));
     }
 
     public function create()
     {
-        $products = Product::select('id', 'product_name', 'product_code', 'stock', 'selling_price',  'company_id', 'branch_id')->where("company_id", FacadesAuth::user()->company_id ?? 1)->where("stock", ">", "0")->get();
+        $products = Product::select('id', 'product_name', 'product_code', 'stock', 'selling_price',  'company_id', 'branch_id')->where("company_id", FacadesAuth::user()->company_id ?? 1)->where("stock", ">", "0")->where('type', 'inventory')->get();
         return view('pages.sales.create', compact('products'));
     }
 

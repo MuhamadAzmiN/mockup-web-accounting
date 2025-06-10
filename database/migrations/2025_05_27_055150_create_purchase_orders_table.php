@@ -14,8 +14,7 @@ return new class extends Migration
         Schema::create('purchase_orders', function (Blueprint $table) {
             $table->id(); // ID PO
             $table->string('po_number')->unique(); // Nomor Purchase Order
-            $table->date('order_date'); // Tanggal dibuat
-            $table->enum('status', ['draft', 'sent', 'received', 'completed'])->default('draft');
+            $table->date('order_date'); // Tanggal dibuatp
             $table->decimal('total_amount', 18, 2)->default(0); // Total pembelian
             $table->string('company_id')->nullable(); // Nama Perusahaan
             $table->foreignId('created_by')->nullable();

@@ -97,13 +97,13 @@
                                 </td>
                                 <td class="px-4 py-4 text-sm whitespace-nowrap">
                                     <div>
-                                        <h4 class="text-gray-700 dark:text-gray-200">{{ $item->company->name }}</h4>
+                                        <h4 class="text-gray-700 dark:text-gray-200">{{ $item->company->name ?? '-'}}</h4>
                                      
                                     </div>
                                 </td>
                                 <td class="px-4 py-4 text-sm whitespace-nowrap">
                                   <div>
-                                        <h4 class="text-gray-700 dark:text-gray-200">{{ $item->branch->name }}</h4>
+                                        <h4 class="text-gray-700 dark:text-gray-200">{{ $item->branch->name ?? '-' }}</h4>
                                      
                                     </div>
                                      

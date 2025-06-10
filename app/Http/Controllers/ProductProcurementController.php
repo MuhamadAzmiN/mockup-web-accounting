@@ -24,45 +24,76 @@ class ProductProcurementController extends Controller
     }
     
     public function index()
-    {
-        $purchaseOrders = PurchaseOrder::with(['company', 'branch'])
-            ->where('company_id', Auth::user()->company_id) 
-            ->orderBy('created_at', 'desc')
-            ->orWhere(function ($query) {
-                if (request()->has('search') && request('search') != '') {
-                    $search = request('search');
-                    $query->where('po_number', 'like', '%' . $search . '%')
-                        ->orWhereHas('company', function ($q) use ($search) {
-                            $q->where('name', 'like', '%' . $search . '%');
-                        })
-                        ->orWhereHas('branch', function ($q) use ($search) {
-                            $q->where('name', 'like', '%' . $search . '%');
-                        })
-                        ->orWhereHas('product', function ($q) use ($search) {
-                            $q->where('product_name', 'like', '%' . $search . '%')
-                                ->orWhere('product_code', 'like', '%' . $search . '%');
-                        });
-                }
-            })
-            ->paginate(10);
-        return view('pages.productProcurement.index', compact('purchaseOrders'));
+{
+     $query = PurchaseOrder::with(['company', 'branch', 'product'])
+        ->whereHas('product', function ($q) {
+            $q->where('type', 'inventory');
+        })
+        ->orderBy('created_at', 'desc');
+
+    if (Auth::user()->company) {
+        $query->where('company_id', Auth::user()->company_id);
     }
 
-    public function create()
-    {
-        $products = Product::select('id', 'product_name', 'product_code')->where('company_id', Auth::user()->company_id)->where('stock', '>', '0')->get();
-        
-       
-        $branches = Auth::user()->company->branches()->select('id', 'name')->get();
-        return view('pages.productProcurement.create', compact('products', 'branches'));
+    if (request()->has('search') && request('search') != '') {
+        $search = request('search');
+        $query->where(function ($q) use ($search) {
+            $q->where('po_number', 'like', '%' . $search . '%')
+              ->orWhereHas('company', function ($q2) use ($search) {
+                  $q2->where('name', 'like', '%' . $search . '%');
+              })
+              ->orWhereHas('branch', function ($q2) use ($search) {
+                  $q2->where('name', 'like', '%' . $search . '%');
+              })
+              ->orWhereHas('product', function ($q2) use ($search) {
+                  $q2->where('product_name', 'like', '%' . $search . '%')
+                      ->orWhere('product_code', 'like', '%' . $search . '%');
+              });
+        });
     }
+
+    $purchaseOrders = $query->paginate(10);
+
+    return view('pages.productProcurement.index', compact('purchaseOrders'));
+}
+
+
+    public function create()
+{
+    $products = collect();
+    $branches = collect();
+
+    if (Auth::user()->company) {
+        $products = Product::select('id', 'product_name', 'product_code')
+            ->where('company_id', Auth::user()->company_id)
+            ->where('stock', '>', -1) // Gunakan angka, bukan string
+            ->where('type', 'inventory')
+            ->get();
+
+        $branches = Auth::user()->company->branches()
+            ->select('id', 'name')
+            ->get();
+    } elseif (Auth::user()->hasRole('super-admin')) {
+        $products = Product::select('id', 'product_name', 'product_code')
+            ->where('stock', '>', -1)
+            ->where('type', 'inventory')
+            ->get();
+
+        $branches = DB::table('branches')
+            ->select('id', 'name')
+            ->get();
+    }
+
+    return view('pages.productProcurement.create', compact('products', 'branches'));
+}
+
 
     public function store(Request $request)
     {
         $request->validate([
             'po_number'    => 'required|unique:purchase_orders',
             'order_date'   => 'required|date',
-            'status'       => 'required',
+            // 'status'       => 'required',
             'company_id'   => 'required',
             'branch_id'    => 'required',
             'total_amount' => 'required|numeric',

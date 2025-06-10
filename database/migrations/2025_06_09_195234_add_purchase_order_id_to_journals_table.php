@@ -11,10 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('purchase_orders', function (Blueprint $table) {
-            $table->foreignId('product_id')
-                ->nullable();
+        Schema::table('journals', function (Blueprint $table) {
+            $table->unsignedBigInteger('purchase_order_id')->nullable()->after('id');
+            $table->foreign('purchase_order_id')->references('id')->on('purchase_orders')->onDelete('set null');
         });
+
     }
 
     /**
@@ -22,7 +23,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('purchase_orders', function (Blueprint $table) {
+        Schema::table('journals', function (Blueprint $table) {
             //
         });
     }

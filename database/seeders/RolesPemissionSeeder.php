@@ -59,7 +59,7 @@ class RolesPemissionSeeder extends Seeder
 
             // Role lain belum punya permission karena hanya super-admin yang diberikan
             $admin->syncPermissions([]);
-            $finance->syncPermissions([]);
+            $finance->syncPermissions(Permission::all());
             $customerService->syncPermissions([]);
 
             // Assign super-admin ke user pertama

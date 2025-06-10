@@ -84,6 +84,8 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
     Route::post('/operational/store', [OperationalController::class, 'store'])->name('operational.store');
     Route::get('/operational/{id}', [OperationalController::class, 'show'])->name('operational.show');
     Route::delete('/operational/{id}', [OperationalController::class, 'destroy'])->name('operational.destroy');
+    Route::get('/operational/{id}/edit', [OperationalController::class, 'edit'])->name('operational.edit');
+    Route::put('/operational/{id}', [OperationalController::class, 'update'])->name('operational.update');
 
 });
 

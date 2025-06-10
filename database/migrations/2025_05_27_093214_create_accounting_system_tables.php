@@ -98,7 +98,7 @@ return new class extends Migration
 
         // Create journal_entries table
         Schema::create('journal_entries', function (Blueprint $table) {
-            $table->id();
+            $table->bigIncrements('id');
             $table->unsignedInteger('journal_id')->nullable();
             $table->unsignedInteger('account_id')->nullable();
             $table->decimal('debit', 14, 2)->default(0);
@@ -320,14 +320,14 @@ private function insertSampleData()
     ]);
 
     // Insert journals
-    DB::table('journals')->insert([
-        ['id' => 1, 'journal_date' => '2025-05-23', 'description' => 'Penjualan tunai 1.000.000', 'created_by' => 'system', 'company_id' => 1, 'branch_id' => 1],
-    ]);
+    // DB::table('journals')->insert([
+    //     ['id' => 1, 'journal_date' => '2025-05-23', 'description' => 'Penjualan tunai 1.000.000', 'created_by' => 'system', 'company_id' => 1, 'branch_id' => 1],
+    // ]);
 
-    // Insert journal entries
-    DB::table('journal_entries')->insert([
-        ['id' => 1, 'journal_id' => 1, 'account_id' => 101, 'debit' => 1000000.00, 'credit' => 0.00, 'source_event' => 'PENJUALAN_TUNAI', 'source_ref_id' => 'INV-001'],
-        ['id' => 2, 'journal_id' => 1, 'account_id' => 401, 'debit' => 0.00, 'credit' => 1000000.00, 'source_event' => 'PENJUALAN_TUNAI', 'source_ref_id' => 'INV-001'],
-    ]);
+    // // Insert journal entries
+    // DB::table('journal_entries')->insert([
+    //     ['id' => 1, 'journal_id' => 1, 'account_id' => 101, 'debit' => 1000000.00, 'credit' => 0.00, 'source_event' => 'PENJUALAN_TUNAI', 'source_ref_id' => 'INV-001'],
+    //     ['id' => 2, 'journal_id' => 1, 'account_id' => 401, 'debit' => 0.00, 'credit' => 1000000.00, 'source_event' => 'PENJUALAN_TUNAI', 'source_ref_id' => 'INV-001'],
+    // ]);
 }
 };

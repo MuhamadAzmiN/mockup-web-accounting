@@ -76,27 +76,31 @@ class DashboardController extends Controller
 
     private function getTotalExpenditure()
     {
-     $companyId = Auth::user()->company_id;
+        $companyId = Auth::user()->company_id;
 
-    $totalProductPurchased = DB::table('purchase_orders')
-        ->join('products', 'purchase_orders.product_id', '=', 'products.id')
-        ->where('purchase_orders.company_id', $companyId)
-        ->where('products.type', 'operational') // filter hanya produk operational
-        ->sum('purchase_orders.total_amount') ?? 0;
+        $totalProductPurchased = DB::table('purchase_orders')
+            ->join('products', 'purchase_orders.product_id', '=', 'products.id')
+            ->where('purchase_orders.company_id', $companyId)
+            ->where('products.type', 'operational') // hanya produk operational
+            ->where('purchase_orders.status', 'completed') // hanya PO yang completed
+            ->sum('purchase_orders.total_amount') ?? 0;
 
-    return [
-        'total_product_purchased' => $totalProductPurchased,
-    ];
+        return [
+            'total_product_purchased' => $totalProductPurchased,
+        ];
     }
 
 
-    private function getGoodsSold()
+
+   private function getGoodsSold()
 {
     $companyId = Auth::user()->company_id;
 
     $detailTotalItems = DB::table('sale_items')
-        ->join('sales', 'sale_items.sale_id', '=', 'sales.id') // ini perbaikan
+        ->join('sales', 'sale_items.sale_id', '=', 'sales.id')
+        ->join('products', 'sale_items.product_id', '=', 'products.id') // Join ke tabel products
         ->where('sales.company_id', $companyId)
+        ->where('products.type', 'inventory') // Filter hanya yang type = inventory
         ->select(DB::raw('SUM(sale_items.quantity) as total_quantity'))
         ->first();
 
@@ -104,6 +108,7 @@ class DashboardController extends Controller
         'total_quantity' => $detailTotalItems->total_quantity ?? 0,
     ];
 }
+
 
 
 private function getTotalProductPurchased() 

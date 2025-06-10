@@ -10,6 +10,7 @@ use App\Models\Journal;
 use App\Models\JournalEntries;
 use App\Models\VwBalanceSheet;
 use App\Models\VwGeneralLedger;
+use PHPUnit\TestRunner\TestResult\Collector;
 
 class FinanceController extends Controller
 {
@@ -26,7 +27,9 @@ class FinanceController extends Controller
 
    public function index()
 {
-    $journals = Journal::with(['company', 'branch'])
+    $journals = collect();
+    if (Auth::user()->company){
+       $journals = Journal::with(['company', 'branch'])
         ->where('company_id', Auth::user()->company_id)
         ->when(request()->filled('search'), function ($query) {
             $search = request('search');
@@ -43,6 +46,25 @@ class FinanceController extends Controller
         ->orderBy('created_at', 'desc')
         ->paginate(10);
 
+    }else if (Auth::user()->hasRole('super-admin')) {
+        $journals = Journal::with(['company', 'branch'])
+        ->when(request()->filled('search'), function ($query) {
+            $search = request('search');
+            $query->whereHas('branch', function ($q) use ($search) {
+                $q->where('name', 'like', '%' . $search . '%');
+            });
+        })
+        ->when(request()->filled('start_date') && request()->filled('end_date'), function ($query) {
+            $query->whereBetween('created_at', [
+                request('start_date') . ' 00:00:00',
+                request('end_date') . ' 23:59:59',
+            ]);
+        })
+        ->orderBy('created_at', 'desc')
+        ->paginate(10);
+    }
+   
+    
     return view('pages.finance.index', compact('journals'));
 }
 
@@ -58,6 +80,7 @@ class FinanceController extends Controller
                             ->get();
 
         $accounts = Account::all();
+
         
         return view('pages.finance.detail', compact('journal', 'items', 'accounts'));
     }

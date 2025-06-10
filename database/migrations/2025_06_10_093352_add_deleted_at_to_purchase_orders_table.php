@@ -12,8 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('purchase_orders', function (Blueprint $table) {
-            $table->foreignId('product_id')
-                ->nullable();
+            //
         });
     }
 
