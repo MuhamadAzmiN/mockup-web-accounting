@@ -37,7 +37,7 @@
                                 </span>
                                 <input type="text" name="product_code" id="product_code" value="{{ old('product_code') ? str_replace('PRODOPRI', '', old('product_code')) : '' }}" 
                                     class="block w-full rounded-r-lg border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white transition-colors duration-200"
-                                    placeholder="Enter numeric code only">
+                                    placeholder="Enter product code">
                             </div>
                             @error('product_code')
                                 <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
@@ -100,7 +100,7 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                                     </svg>
                                 </div>
-                                <input type="number" name="stock" id="stock" value="{{ old('stock', 0) }}" min="0"
+                                <input type="number" name="stock" id="stock" placeholder="0" value="" min="0"
                                     class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 transition-colors duration-200"
                                     placeholder="0">
                             </div>

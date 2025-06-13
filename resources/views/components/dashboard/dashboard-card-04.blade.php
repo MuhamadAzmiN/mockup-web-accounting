@@ -58,7 +58,7 @@
         </header>
         <div class="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase mb-1">Purchased Product</div>
         <div class="flex items-start mb-10">
-            <div class="text-2xl font-bold text-gray-800 dark:text-gray-100 mr-2">Rp{{ number_format($getTotalProductPurchased['total_operational_product_purchased'], 0) }}</div>
+            <div class="text-2xl font-bold text-gray-800 dark:text-gray-100 mr-2">{{ number_format($getTotalProductPurchased['total_operational_product_purchased'], 0) }}</div>
            
         </div>
     </div>

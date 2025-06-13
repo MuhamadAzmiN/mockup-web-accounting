@@ -22,40 +22,42 @@ class ProductProcurementController extends Controller
             return $next($request);
         });
     }
-    
+
     public function index()
-{
-     $query = PurchaseOrder::with(['company', 'branch', 'product'])
-        ->whereHas('product', function ($q) {
-            $q->where('type', 'inventory');
-        })
-        ->orderBy('created_at', 'desc');
+    {
+        $query = PurchaseOrder::with(['company', 'branch', 'product'])
+            ->whereHas('product', function ($q) {
+                $q->where('type', 'inventory');
+            })
+            ->orderBy('created_at', 'desc');
 
-    if (Auth::user()->company) {
-        $query->where('company_id', Auth::user()->company_id);
+        if (Auth::user()->company) {
+            $query->where('company_id', Auth::user()->company_id);
+        }
+
+        if (request()->has('search') && request('search') != '') {
+            $search = strtolower(request('search'));
+
+            $query->where(function ($q) use ($search) {
+                $q->where(DB::raw('LOWER(po_number)'), 'like', '%' . $search . '%')
+                ->orWhereHas('company', function ($q2) use ($search) {
+                    $q2->where(DB::raw('LOWER(name)'), 'like', '%' . $search . '%');
+                })
+                ->orWhereHas('branch', function ($q2) use ($search) {
+                    $q2->where(DB::raw('LOWER(name)'), 'like', '%' . $search . '%');
+                })
+                ->orWhereHas('product', function ($q2) use ($search) {
+                    $q2->where(DB::raw('LOWER(product_name)'), 'like', '%' . $search . '%')
+                        ->orWhere(DB::raw('LOWER(product_code)'), 'like', '%' . $search . '%');
+                });
+            });
+        }
+
+        $purchaseOrders = $query->paginate(10);
+
+        return view('pages.productProcurement.index', compact('purchaseOrders'));
     }
 
-    if (request()->has('search') && request('search') != '') {
-        $search = request('search');
-        $query->where(function ($q) use ($search) {
-            $q->where('po_number', 'like', '%' . $search . '%')
-              ->orWhereHas('company', function ($q2) use ($search) {
-                  $q2->where('name', 'like', '%' . $search . '%');
-              })
-              ->orWhereHas('branch', function ($q2) use ($search) {
-                  $q2->where('name', 'like', '%' . $search . '%');
-              })
-              ->orWhereHas('product', function ($q2) use ($search) {
-                  $q2->where('product_name', 'like', '%' . $search . '%')
-                      ->orWhere('product_code', 'like', '%' . $search . '%');
-              });
-        });
-    }
-
-    $purchaseOrders = $query->paginate(10);
-
-    return view('pages.productProcurement.index', compact('purchaseOrders'));
-}
 
 
     public function create()

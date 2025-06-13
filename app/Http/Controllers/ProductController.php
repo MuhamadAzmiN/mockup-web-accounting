@@ -5,33 +5,38 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Product;
 use App\Traits\AuthorizationChecker;
-use DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
+  use Illuminate\Support\Facades\DB;
 
 
 class ProductController extends Controller
 {
     use AuthorizationChecker;
+ 
+
     public function index()
     {
         $this->checkAuthorization(Auth::user(), ['manage_product']);
-        $product = collect();
-        if (Auth::user()->company){
-          $products = Product::where('company_id', Auth::user()->company_id)
-            ->where('type', 'inventory') // filter dulu hanya operational
-            ->orderBy('created_at', 'desc');
-        }else if(Auth::user()->hasRole('super-admin')){
+
+        $products = collect();
+
+        if (Auth::user()->company) {
+            $products = Product::where('company_id', Auth::user()->company_id)
+                ->where('type', 'inventory')
+                ->orderBy('created_at', 'desc');
+        } else if (Auth::user()->hasRole('super-admin')) {
             $products = Product::where('type', 'inventory');
         }
 
         if (request()->has('search') && request('search') != '') {
-            $search = request('search');
+            $search = strtolower(request('search'));
+
             $products = $products->where(function ($query) use ($search) {
-                $query->where('product_code', 'like', '%' . $search . '%')
-                    ->orWhere('external_product_code', 'like', '%' . $search . '%')
-                    ->orWhere('product_name', 'like', '%' . $search . '%');
+                $query->where(DB::raw('LOWER(product_code)'), 'like', '%' . $search . '%')
+                    ->orWhere(DB::raw('LOWER(external_product_code)'), 'like', '%' . $search . '%')
+                    ->orWhere(DB::raw('LOWER(product_name)'), 'like', '%' . $search . '%');
             });
         }
 
@@ -39,6 +44,7 @@ class ProductController extends Controller
 
         return view('pages.products.index', compact('products'));
     }
+
 
 
 

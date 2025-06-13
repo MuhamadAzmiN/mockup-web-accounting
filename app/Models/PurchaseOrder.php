@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * 
@@ -41,6 +42,8 @@ class PurchaseOrder extends Model
 {
     protected $table = 'purchase_orders';
     protected $guarded = ["id"];
+    use SoftDeletes;
+    protected $dates = ['deleted_at'];
 
 
     public function company()

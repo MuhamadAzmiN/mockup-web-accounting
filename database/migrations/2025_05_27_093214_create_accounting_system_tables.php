@@ -231,28 +231,29 @@ private function createViews()
     ");
 
     // Create vw_profit_and_loss view
-        DB::statement("
-            CREATE OR REPLACE VIEW vw_profit_and_loss AS
-            SELECT 
-                a.id AS account_id,
-                a.code AS account_code,
-                a.name AS account_name,
-                a.type AS account_type,
-                j.company_id,
-                j.branch_id,
-                SUM(je.debit) AS total_debit,
-                SUM(je.credit) AS total_credit,
-                CASE
-                    WHEN a.type = 'Pendapatan' THEN SUM(je.credit - je.debit)
-                    WHEN a.type = 'Beban' THEN SUM(je.debit - je.credit)
-                    ELSE 0
-                END AS net_value
-            FROM journal_entries je
-            JOIN accounts a ON je.account_id = a.id
-            JOIN journals j ON je.journal_id = j.id
-            WHERE a.type IN ('Pendapatan', 'Beban')
-            GROUP BY a.id, a.code, a.name, a.type, j.company_id, j.branch_id
-        ");
+       DB::statement("
+    CREATE OR REPLACE VIEW vw_profit_and_loss AS
+      SELECT 
+        a.id AS account_id,
+        a.code AS account_code,
+        a.name AS account_name,
+        a.type AS account_type,
+        j.company_id,
+        j.branch_id,
+        j.journal_date AS journal_date,
+        SUM(je.debit) AS total_debit,
+        SUM(je.credit) AS total_credit,
+        CASE
+            WHEN a.type = 'Pendapatan' THEN SUM(je.credit - je.debit)
+            WHEN a.type = 'Beban' THEN SUM(je.debit - je.credit)
+            ELSE 0
+        END AS net_value
+    FROM journal_entries je
+    JOIN accounts a ON je.account_id = a.id
+    JOIN journals j ON je.journal_id = j.id
+    WHERE a.type IN ('Pendapatan', 'Beban')
+    GROUP BY a.id, a.code, a.name, a.type, j.company_id, j.branch_id, j.journal_date
+");
 
     // Create vw_trial_balance view
     DB::statement("

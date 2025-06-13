@@ -10,10 +10,11 @@ use App\Models\Product;
 use App\Models\PurchaseOrder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use App\Traits\AuthorizationChecker;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Str;
+use Termwind\Components\Dd;
+use Illuminate\Support\Facades\DB;
 
 class OperationalController extends Controller
 {
@@ -27,32 +28,35 @@ class OperationalController extends Controller
             return $next($request);
         });
     }
-   public function index()
+
+
+    public function index()
     {
-      
         $products = collect();
-        if (Auth::user()->company){
+
+        if (Auth::user()->company) {
             $products = Product::where('company_id', Auth::user()->company_id)
-            ->where('type', 'operational')
-            ->orderBy('created_at', 'desc');
-        }else if(Auth::user()->hasRole('super-admin')){
+                ->where('type', 'operational')
+                ->orderBy('created_at', 'desc');
+        } else if (Auth::user()->hasRole('super-admin')) {
             $products = Product::where('type', 'operational');
         }
 
         if (request()->has('search') && request('search') != '') {
-            $search = request('search');
+            $search = strtolower(request('search'));
+
             $products = $products->where(function ($query) use ($search) {
-                $query->where('product_code', 'like', '%' . $search . '%')
-                    ->orWhere('external_product_code', 'like', '%' . $search . '%')
-                    ->orWhere('product_name', 'like', '%' . $search . '%');
+                $query->where(DB::raw('LOWER(product_code)'), 'like', '%' . $search . '%')
+                    ->orWhere(DB::raw('LOWER(external_product_code)'), 'like', '%' . $search . '%')
+                    ->orWhere(DB::raw('LOWER(product_name)'), 'like', '%' . $search . '%');
             });
         }
-
 
         $products = $products->paginate(10);
 
         return view('pages.operational.index', compact('products'));
     }
+
 
 
     public function create()
@@ -188,9 +192,17 @@ class OperationalController extends Controller
 
     public function show($id)
     {
-        $product = Product::findOrFail($id)->where('company_id', Auth::user()->company_id)
-            ->where('type', 'operational') // filter dulu hanya operational
-            ->first();
+        $product = collect();    
+        if (Auth::user()->hasRole('super-admin')) {
+            $product = Product::findOrFail($id)->first();
+        }else if(Auth::user()->company){
+            $product = Product::findOrFail($id)->where('company_id', Auth::user()->company_id)
+                ->where('type', 'operational') // filter dulu hanya operational
+                ->first();
+            
+            
+        }
+        
     
 
         return view('pages.operational.detail', compact('product'));
@@ -206,6 +218,7 @@ public function destroy($id)
         $product = Product::findOrFail($id);
         
         $purchaseOrder = PurchaseOrder::where('product_id', $id)->first();
+       
         if ($purchaseOrder) {
             logger("PO ditemukan: " . $purchaseOrder->po_number);
             
@@ -213,7 +226,6 @@ public function destroy($id)
             if ($journal) {
                 logger("Jurnal ditemukan: " . $journal->description);
                 
-                // Cek apakah sudah ada jurnal pembalikan untuk penghapusan
                 $existingDeletionReversal = JournalEntries::where('journal_id', $journal->id)
                     ->where('source_event', 'PEMBALIKAN - PENGHAPUSAN PRODUK')
                     ->first();
@@ -222,7 +234,6 @@ public function destroy($id)
                     return back()->with('error', 'Jurnal pembalik untuk penghapusan produk ini sudah pernah dibuat.');
                 }
                 
-                // LANGKAH 1: Buat jurnal balik dari entri yang masih aktif (bukan pembalikan)
                 $activeEntries = JournalEntries::where('journal_id', $journal->id)
                     ->where('source_event', 'PEMBELIAN TUNAI')
                     ->get();
@@ -232,8 +243,8 @@ public function destroy($id)
                         JournalEntries::create([
                             'journal_id' => $journal->id,
                             'account_id' => $entry->account_id,
-                            'debit' => $entry->credit ?? 0, // Balik: credit jadi debit
-                            'credit' => $entry->debit ?? 0, // Balik: debit jadi credit
+                            'debit' => $entry->credit ?? 0,
+                            'credit' => $entry->debit ?? 0,
                             'source_event' => 'PEMBALIKAN - PENGHAPUSAN PRODUK',
                             'source_ref_id' => $purchaseOrder->po_number,
                         ]);
@@ -244,7 +255,6 @@ public function destroy($id)
                     logger("Tidak ada entri aktif yang perlu dibalik");
                 }
                 
-                // Update deskripsi jurnal untuk menandai sebagai reversed
                 $journal->update([
                     'description' => $journal->description . ' - REVERSED (PRODUK DIHAPUS)'
                 ]);
@@ -252,22 +262,22 @@ public function destroy($id)
             } else {
                 logger("Jurnal tidak ditemukan untuk PO: " . $purchaseOrder->po_number);
             }
-            
-            // Tandai PO sebagai inactive
-            $purchaseOrder->update(['status' => 'inactive']);
-            logger("PO " . $purchaseOrder->po_number . " diubah menjadi inactive");
-            
+
+            // 👉 Soft delete PO (bukan set status inactive)
+            $purchaseOrder->delete();
+            logger("PO " . $purchaseOrder->po_number . " telah di-soft-delete");
         } else {
             logger("PO tidak ditemukan untuk product_id " . $id);
         }
+         $purchaseOrder->update(['status' => 'inactive']);
         
-        // Hapus produk
         $product->delete();
+        
         logger("Produk berhasil dihapus");
         
         DB::commit();
         
-        return redirect()->route('operational')->with('success', 'Produk berhasil dihapus, PO dinonaktifkan, dan jurnal dibalik.');
+        return redirect()->route('operational')->with('success', 'Produk berhasil dihapus, PO dihapus (soft delete), dan jurnal dibalik.');
         
     } catch (\Exception $e) {
         DB::rollBack();
@@ -275,7 +285,6 @@ public function destroy($id)
         return back()->with('error', 'Gagal menghapus produk: ' . $e->getMessage());
     }
 }
-
 
 public function edit($id){
        $branches = collect();

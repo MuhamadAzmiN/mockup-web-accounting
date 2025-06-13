@@ -12,8 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('purchase_orders', function (Blueprint $table) {
-            //
+            $table->softDeletes(); // ini otomatis menambah kolom deleted_at nullable
         });
+
     }
 
     /**

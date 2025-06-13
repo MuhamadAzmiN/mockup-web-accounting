@@ -10,6 +10,7 @@ use App\Models\Journal;
 use App\Models\JournalEntries;
 use App\Models\VwBalanceSheet;
 use App\Models\VwGeneralLedger;
+use Illuminate\Support\Facades\DB;
 use PHPUnit\TestRunner\TestResult\Collector;
 
 class FinanceController extends Controller
@@ -25,48 +26,49 @@ class FinanceController extends Controller
         });
     }
 
-   public function index()
+
+public function index()
 {
     $journals = collect();
-    if (Auth::user()->company){
-       $journals = Journal::with(['company', 'branch'])
-        ->where('company_id', Auth::user()->company_id)
-        ->when(request()->filled('search'), function ($query) {
-            $search = request('search');
-            $query->whereHas('branch', function ($q) use ($search) {
-                $q->where('name', 'like', '%' . $search . '%');
-            });
-        })
-        ->when(request()->filled('start_date') && request()->filled('end_date'), function ($query) {
-            $query->whereBetween('created_at', [
-                request('start_date') . ' 00:00:00',
-                request('end_date') . ' 23:59:59',
-            ]);
-        })
-        ->orderBy('created_at', 'desc')
-        ->paginate(10);
 
-    }else if (Auth::user()->hasRole('super-admin')) {
+    if (Auth::user()->company) {
         $journals = Journal::with(['company', 'branch'])
-        ->when(request()->filled('search'), function ($query) {
-            $search = request('search');
-            $query->whereHas('branch', function ($q) use ($search) {
-                $q->where('name', 'like', '%' . $search . '%');
-            });
-        })
-        ->when(request()->filled('start_date') && request()->filled('end_date'), function ($query) {
-            $query->whereBetween('created_at', [
-                request('start_date') . ' 00:00:00',
-                request('end_date') . ' 23:59:59',
-            ]);
-        })
-        ->orderBy('created_at', 'desc')
-        ->paginate(10);
+            ->where('company_id', Auth::user()->company_id)
+            ->when(request()->filled('search'), function ($query) {
+                $search = strtolower(request('search')); // ubah ke lowercase
+                $query->whereHas('branch', function ($q) use ($search) {
+                    $q->where(DB::raw('LOWER(name)'), 'like', '%' . $search . '%');
+                });
+            })
+            ->when(request()->filled('start_date') && request()->filled('end_date'), function ($query) {
+                $query->whereBetween('created_at', [
+                    request('start_date') . ' 00:00:00',
+                    request('end_date') . ' 23:59:59',
+                ]);
+            })
+            ->orderBy('created_at', 'desc')
+            ->paginate(10);
+    } elseif (Auth::user()->hasRole('super-admin')) {
+        $journals = Journal::with(['company', 'branch'])
+            ->when(request()->filled('search'), function ($query) {
+                $search = strtolower(request('search'));
+                $query->whereHas('branch', function ($q) use ($search) {
+                    $q->where(DB::raw('LOWER(name)'), 'like', '%' . $search . '%');
+                });
+            })
+            ->when(request()->filled('start_date') && request()->filled('end_date'), function ($query) {
+                $query->whereBetween('created_at', [
+                    request('start_date') . ' 00:00:00',
+                    request('end_date') . ' 23:59:59',
+                ]);
+            })
+            ->orderBy('created_at', 'desc')
+            ->paginate(10);
     }
-   
-    
+
     return view('pages.finance.index', compact('journals'));
 }
+
 
 
 

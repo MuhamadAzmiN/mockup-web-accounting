@@ -44,7 +44,7 @@
 
                                 <input type="text" name="product_code" id="product_code" value="{{ preg_replace('/^PROD/', '', old('product_code') ?? ($product->product_code ?? '')) }}" 
                                     class="block w-full rounded-r-lg border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white transition-colors duration-200"
-                                    placeholder="Enter numeric code only">
+                                    placeholder="Enter product code">
                             </div>
                             @error('product_code')
                                 <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
